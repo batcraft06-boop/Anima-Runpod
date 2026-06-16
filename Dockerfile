@@ -24,16 +24,18 @@ RUN comfy model download \
 # RI-MIX Illustrious Anima checkpoint.
 # CivitAI model page: https://civitai.com/models/996495/ri-mix-illustrious-anima
 RUN --mount=type=secret,id=civitai_token \
-  CIVITAI_TOKEN="$(cat /run/secrets/civitai_token)" && \
+  CIVITAI_API_TOKEN="$(cat /run/secrets/civitai_token)" && \
+  export CIVITAI_API_TOKEN && \
   comfy model download \
-    --url "https://civitai.com/api/download/models/3020951?token=${CIVITAI_TOKEN}" \
+    --url "https://civitai.com/api/download/models/3020951" \
     --relative-path models/diffusion_models \
     --filename ri-mix-illustrious-anima.safetensors
 
 # Optional turbo LoRA for switching back to the base Anima setup.
 RUN --mount=type=secret,id=civitai_token \
-  CIVITAI_TOKEN="$(cat /run/secrets/civitai_token)" && \
+  CIVITAI_API_TOKEN="$(cat /run/secrets/civitai_token)" && \
+  export CIVITAI_API_TOKEN && \
   comfy model download \
-    --url "https://civitai.com/api/download/models/2877687?token=${CIVITAI_TOKEN}" \
+    --url "https://civitai.com/api/download/models/2877687" \
     --relative-path models/loras \
     --filename anima_turbo.safetensors
