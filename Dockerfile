@@ -2,14 +2,10 @@
 
 FROM runpod/worker-comfyui:5.8.5-base
 
-# Custom node needed by your workflow:
-# "Power Lora Loader (rgthree)"
+# Custom node needed by existing Megumin Suite workflows.
 RUN comfy-node-install rgthree-comfy
 
-# Anima Base v1.0
-# Hugging Face says anima-base-v1.0.safetensors goes in ComfyUI/models/diffusion_models,
-# qwen_3_06b_base.safetensors goes in text_encoders,
-# qwen_image_vae.safetensors goes in vae.
+# Anima support files required by Anima-family Qwen Image workflows.
 RUN comfy model download \
   --url https://huggingface.co/circlestone-labs/Anima/resolve/main/split_files/diffusion_models/anima-base-v1.0.safetensors \
   --relative-path models/diffusion_models \
@@ -25,8 +21,16 @@ RUN comfy model download \
   --relative-path models/vae \
   --filename qwen_image_vae.safetensors
 
-# CivitAI LoRA.
-# Uses a BuildKit secret, so the token is not written directly into the Dockerfile.
+# RI-MIX Illustrious Anima checkpoint.
+# CivitAI model page: https://civitai.com/models/996495/ri-mix-illustrious-anima
+RUN --mount=type=secret,id=civitai_token \
+  CIVITAI_TOKEN="$(cat /run/secrets/civitai_token)" && \
+  comfy model download \
+    --url "https://civitai.com/api/download/models/3020951?token=${CIVITAI_TOKEN}" \
+    --relative-path models/diffusion_models \
+    --filename ri-mix-illustrious-anima.safetensors
+
+# Optional turbo LoRA for switching back to the base Anima setup.
 RUN --mount=type=secret,id=civitai_token \
   CIVITAI_TOKEN="$(cat /run/secrets/civitai_token)" && \
   comfy model download \
